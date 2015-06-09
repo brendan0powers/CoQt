@@ -5,7 +5,7 @@
 #include "context.h"
 #include "wakecondition.h"
 
-#define MIN_TICK_INTERVAL 150
+#define MIN_TICK_INTERVAL 15
 
 using namespace CoQt;
 
@@ -13,6 +13,7 @@ Scheduler::Scheduler(Context *parent)
     : QObject(parent)
     , m_pContext(parent)
     , m_pTickTImer(new QTimer(this))
+    , m_iMinTickTime(MIN_TICK_INTERVAL)
 {
     connect(m_pTickTImer, &QTimer::timeout, this, &Scheduler::runFibers);
     m_pTickTImer->setSingleShot(true);
@@ -21,6 +22,16 @@ Scheduler::Scheduler(Context *parent)
 Scheduler::~Scheduler()
 {
 
+}
+
+int Scheduler::minimumTickTime()
+{
+    return m_iMinTickTime;
+}
+
+void Scheduler::setMinimumTickTime(int iTickTimeMs)
+{
+    m_iMinTickTime = iTickTimeMs;
 }
 
 void Scheduler::scheculeFiber(WakeCondition *pCondition)
@@ -72,8 +83,8 @@ void Scheduler::calculateNextTick()
         return;
 
     //Ensure the nex scheduled time isn't less than our minimum schedular interval
-    if(iMSec < MIN_TICK_INTERVAL)
-        iMSec = MIN_TICK_INTERVAL;
+    if(iMSec < m_iMinTickTime)
+        iMSec = m_iMinTickTime;
 
     m_pTickTImer->start(iMSec);
 }

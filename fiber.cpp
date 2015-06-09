@@ -98,17 +98,24 @@ void Fiber::wake()
     emit waiting();
 }
 
+//Actually yeild the fiber
 void Fiber::pauseFiber()
 {
     if(context()->curFiber())
          (*context()->curFiber()->m_yield)();
 }
 
+//Register a fiber with this threads context object
+void Fiber::registerFiber()
+{
+    context()->registerFiber(m_wpThis.toStrongRef());
+}
+
 QSharedPointer<Fiber> CoQt::createFiber(const std::function<void()> &func)
 {
     QSharedPointer<Fiber> pFiber = QSharedPointer<Fiber>(new Fiber(func, NULL));
     pFiber->m_wpThis = pFiber.toWeakRef();
-    context()->registerFiber(pFiber);
+    pFiber->registerFiber();
 
     pFiber->wake();
 

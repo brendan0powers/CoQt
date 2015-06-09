@@ -15,7 +15,10 @@ WakeCondition::~WakeCondition()
 
 }
 
-
+void WakeCondition::wake()
+{
+    m_pFiber->wake();
+}
 
 ImmediateWakeConiditon::ImmediateWakeConiditon(QSharedPointer<Fiber> parent)
     : WakeCondition(parent)
@@ -38,11 +41,6 @@ bool ImmediateWakeConiditon::canWake()
     return true;
 }
 
-void ImmediateWakeConiditon::wake()
-{
-    m_pFiber->wake();
-}
-
 
 SleepWakeConiditon::SleepWakeConiditon(int iSleepMs, QSharedPointer<Fiber> parent)
     : WakeCondition(parent)
@@ -63,11 +61,6 @@ QDateTime SleepWakeConiditon::wakeTime()
 bool SleepWakeConiditon::canWake()
 {
     return (m_wakeTime <= QDateTime::currentDateTime());
-}
-
-void SleepWakeConiditon::wake()
-{
-    m_pFiber->wake();
 }
 
 
@@ -98,11 +91,7 @@ bool LambdaWakeConiditon::canWake()
     if(!bResult)
         m_wakeTime = QDateTime::currentDateTime().addMSecs(m_iPollInterval);
 
-    return m_func();
+    return bResult;
 }
 
-void LambdaWakeConiditon::wake()
-{
-    m_pFiber->wake();
-}
 
