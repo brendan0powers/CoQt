@@ -1,0 +1,52 @@
+#include "fiber_p.h"
+#include <boost/coroutine/all.hpp>
+#include "context.h"
+#include <QDebug>
+
+namespace CoQt {
+    class FiberPrivatePlatform {
+    public:
+        boost::coroutines::asymmetric_coroutine<void>::pull_type coroutine;
+        boost::coroutines::asymmetric_coroutine<void>::push_type* yield;
+    };
+}
+
+using namespace CoQt;
+
+void FiberPrivate::init()
+{
+    platform = new FiberPrivatePlatform();
+    platform->yield = NULL;
+    platform->coroutine = boost::coroutines::asymmetric_coroutine<void>::pull_type(
+                [&](boost::coroutines::asymmetric_coroutine<void>::push_type& sink)
+    {
+       platform->yield = &sink;
+       sink();
+
+       function();
+
+       state = Fiber::FiberFinished;
+       emit qxt_p().finished();
+       context()->unregisterFiber(wpThis.toStrongRef());
+    });
+}
+
+void FiberPrivate::cleanup()
+{
+    delete platform;
+    platform = NULL;
+}
+
+//Actually yeild the fiber
+void FiberPrivate::pauseFiber()
+{
+    if(context()->curFiber())
+         (*context()->curFiber()->qxt_d().platform->yield)();
+}
+
+
+void FiberPrivate::wake()
+{
+    platform->coroutine();
+}
+

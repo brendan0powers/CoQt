@@ -3,10 +3,10 @@
 
 #include <QObject>
 #include <functional>
-#include <boost/coroutine/all.hpp>
 #include <QSharedPointer>
 #include <QWeakPointer>
 #include "functional"
+#include "qxtpimpl.h"
 
 namespace CoQt
 {
@@ -23,9 +23,17 @@ class WakeCondition;
 //the fiber continues from the point it which it last yielded. It will then run untill
 //the fiber returns, or yields once more. Once this occurs the wake() function returns.
 
+class FiberPrivate;
+
 class Fiber : public QObject
 {
     Q_OBJECT
+    QXT_DECLARE_PRIVATE(Fiber)
+
+    //Private constructor use CoQt::createFirber to create fiber objects
+    explicit Fiber(std::function<void()> func, QObject *parent = 0);
+
+    friend QSharedPointer<Fiber> createFiber(const std::function<void ()> &);
 public:
     enum FiberState
     {
@@ -92,21 +100,6 @@ signals:
 public slots:
     //Causes the fiber to run. Cancels any pending wake conditions.
     void wake();
-
-private:
-    //Private constructor use CoQt::createFirber to create fiber objects
-    explicit Fiber(std::function<void()> func, QObject *parent = 0);
-    static void pauseFiber();
-    void registerFiber();
-
-    std::function<void()> m_function;
-    boost::coroutines::asymmetric_coroutine<void>::pull_type m_coroutine;
-    boost::coroutines::asymmetric_coroutine<void>::push_type* m_yield;
-    FiberState m_state;
-    QWeakPointer<Fiber> m_wpThis;
-    WakeCondition *m_pCurWaitCondition;
-
-    friend QSharedPointer<Fiber> createFiber(const std::function<void ()> &);
 };
 
 //This function creates a new fiber with the given function object. Usually a

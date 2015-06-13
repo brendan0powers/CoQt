@@ -3,53 +3,42 @@
 #include "scheduler.h"
 #include "context.h"
 #include "wakecondition.h"
+#include "fiber_p.h"
 
 using namespace CoQt;
 
 Fiber::Fiber(std::function<void()> func, QObject *parent)
     : QObject(parent)
-    , m_function(func)
-    , m_yield(NULL)
-    , m_state(FiberIdle)
-    , m_pCurWaitCondition(NULL)
 {
-    m_coroutine = boost::coroutines::asymmetric_coroutine<void>::pull_type(
-                [&](boost::coroutines::asymmetric_coroutine<void>::push_type& sink)
-    {
-       m_yield = &sink;
-       sink();
+    QXT_INIT_PRIVATE(Fiber)
 
-       m_function();
-
-       m_state = FiberFinished;
-       emit finished();
-       context()->unregisterFiber(m_wpThis.toStrongRef());
-    });
+    qxt_d().function = func;
+    qxt_d().init();
 }
 
 Fiber::~Fiber()
 {
-
+    qxt_d().cleanup();
 }
 
 Fiber::FiberState Fiber::getState()
 {
-    return m_state;
+    return qxt_d().state;
 }
 
 bool Fiber::isRunning()
 {
-    return (m_state == FiberRunning);
+    return (qxt_d().state == FiberRunning);
 }
 
 bool Fiber::isWaiting()
 {
-    return (m_state == FiberWaiting);
+    return (qxt_d().state == FiberWaiting);
 }
 
 bool Fiber::isFinished()
 {
-    return (m_state == FiberFinished);
+    return (qxt_d().state == FiberFinished);
 }
 
 void Fiber::yield()
@@ -70,52 +59,45 @@ void Fiber::yield(std::function<bool()> func, int iPollInterval)
 void Fiber::yield(WakeCondition *pCondition)
 {
     context()->scheduler()->scheculeFiber(pCondition);
-    context()->curFiber()->m_pCurWaitCondition = pCondition;
-    pauseFiber();
+    context()->curFiber()->qxt_d().pCurWaitCondition = pCondition;
+    FiberPrivate::pauseFiber();
 }
 
 void Fiber::yieldForever()
 {
-    pauseFiber();
+    FiberPrivate::pauseFiber();
 }
 
 void Fiber::wake()
 {
-    FiberTracker tracker(m_wpThis.toStrongRef());
+    FiberTracker tracker(qxt_d().wpThis.toStrongRef());
 
-    if(m_pCurWaitCondition)
+    if(qxt_d().pCurWaitCondition)
     {
-        delete m_pCurWaitCondition;
-        m_pCurWaitCondition = NULL;
+        delete qxt_d().pCurWaitCondition;
+        qxt_d().pCurWaitCondition = NULL;
     }
 
-    m_state = FiberRunning;
+    qxt_d().state = FiberRunning;
     emit running();
 
-    m_coroutine();
+    qxt_d().wake();
 
-    m_state = FiberWaiting;
+    qxt_d().state = FiberWaiting;
     emit waiting();
 }
 
-//Actually yeild the fiber
-void Fiber::pauseFiber()
-{
-    if(context()->curFiber())
-         (*context()->curFiber()->m_yield)();
-}
-
 //Register a fiber with this threads context object
-void Fiber::registerFiber()
+void FiberPrivate::registerFiber()
 {
-    context()->registerFiber(m_wpThis.toStrongRef());
+    context()->registerFiber(wpThis.toStrongRef());
 }
 
 QSharedPointer<Fiber> CoQt::createFiber(const std::function<void()> &func)
 {
     QSharedPointer<Fiber> pFiber = QSharedPointer<Fiber>(new Fiber(func, NULL));
-    pFiber->m_wpThis = pFiber.toWeakRef();
-    pFiber->registerFiber();
+    pFiber->qxt_d().wpThis = pFiber.toWeakRef();
+    pFiber->qxt_d().registerFiber();
 
     pFiber->wake();
 

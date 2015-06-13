@@ -12,6 +12,18 @@ SOURCES += main.cpp \
     context.cpp \
     wakecondition.cpp
 
+#fiber backends
+win32 {
+    SOURCES += fiber_boost.cpp
+}
+#unix not ready yet
+#else:unix {
+#    SOURCES += fiber_unix.cpp
+#}
+else {
+    SOURCES += fiber_boost.cpp
+}
+
 include(deployment.pri)
 qtcAddDeployment()
 
@@ -19,5 +31,6 @@ HEADERS += \
     fiber.h \
     scheduler.h \
     context.h \
-    wakecondition.h
+    wakecondition.h \
+    fiber_p.h
 

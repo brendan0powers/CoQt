@@ -8,6 +8,7 @@
 namespace CoQt
 {
 class Fiber;
+class FiberPrivate;
 class Scheduler;
 
 //Context
@@ -24,6 +25,7 @@ class Context : public QObject
     Q_OBJECT
 
     friend class Fiber;
+    friend class FiberPrivate;
     friend class FiberTracker;
     friend CoQt::Context *context();
 public:
