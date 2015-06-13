@@ -11,10 +11,9 @@ SOURCES += main.cpp \
 win32 {
     SOURCES += fiber_win32.cpp
 }
-#unix not ready yet
-#else:unix {
-#    SOURCES += fiber_unix.cpp
-#}
+else:unix:!macx {
+    SOURCES += fiber_unix.cpp
+}
 else {
     INCLUDEPATH += "/usr/local/Cellar/boost/1.56.0/include/"
     LIBS += "-L/usr/local/Cellar/boost/1.56.0/lib/"

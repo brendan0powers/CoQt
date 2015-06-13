@@ -1,7 +1,6 @@
 #include "fiber_p.h"
 #include "context.h"
 
-#define _XOPEN_SOURCE 600
 #include "ucontext.h"
 #include <QDebug>
 #include <QThread>
@@ -20,29 +19,17 @@ public:
 
 using namespace CoQt;
 
-static void fiberInit()
+static void fiberInit(void *pData)
 {
-    int pointerLow, pointerHigh;
-    FiberPrivate *pFiber = NULL;
-
-    qDebug() << "Got Here...";
-
-    //re-assemble pointer from 2 32bit ints if necessary
-    if(sizeof(void *) == 32)
-    {
-        pFiber = (FiberPrivate *) pointerLow;
-    }
-    else
-    {
-        pFiber = (FiberPrivate *) (((quint64) pointerHigh) << 32 || pointerLow);
-    }
-
-    swapcontext(&pFiber->platform->child, &fiber->platform->parent);
+    FiberPrivate *pFiber = (FiberPrivate *)pData;
 
     pFiber->function();
 
     //set the state to finished, and unregister fiber
     pFiber->finishFiber();
+
+    //return context to waker, do not return
+    swapcontext(&pFiber->platform->child, &pFiber->platform->parent);
 }
 
 void FiberPrivate::init()
@@ -55,26 +42,12 @@ void FiberPrivate::init()
     platform->child.uc_stack.ss_size = STACK_SIZE;
     platform->child.uc_stack.ss_flags = 0;
 
-    quint32 pointerLow, pointerHigh;
-    if(sizeof(void *) == 32)
-    {
-        //pointerLow = (quint32)this;
-        pointerHigh = 0;
-    }
-    else
-    {
-        //pull pointer into two 32 bit ints
-        pointerLow = (quint32)(((quint64)this) & 0xFFFFFFFF);
-        pointerHigh = (quint32)((((quint64)this) & 0xFFFFFFFF00000000) >> 32);
-    }
-
-    makecontext(&platform->child, (void (*)()) &fiberInit, 0); // 2, pointerLow, pointerHigh);
-    swapcontext(&platform->parent, &platform->child);
+    makecontext(&platform->child, (void (*)()) &fiberInit, 1, this);
 }
 
 void FiberPrivate::cleanup()
 {
-    platform->child.uc_stack.ss_sp;
+    free(platform->child.uc_stack.ss_sp);
 
     delete platform;
     platform = NULL;
@@ -84,9 +57,7 @@ void FiberPrivate::cleanup()
 void FiberPrivate::pauseFiber()
 {
     if(context()->curFiber())
-    {
         swapcontext(&context()->curFiber()->qxt_d().platform->child, &context()->curFiber()->qxt_d().platform->parent);
-    }
 }
 
 

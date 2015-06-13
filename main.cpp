@@ -67,10 +67,12 @@ void testLambda()
     });
 }
 
+QSharedPointer<CoQt::Fiber> pFiber1;
+
 //Test multiple nested/related fibers
 void testNestedFibers()
 {
-    QSharedPointer<CoQt::Fiber> pFiber1 = CoQt::createFiber([&]() {
+    pFiber1 = CoQt::createFiber([&]() {
 
        CoQt::createFiber([&]() {
            int i = 0;
@@ -145,12 +147,14 @@ int main(int argc, char * argv[])
     qDebug() << "Simple Sleep Test";
     qDebug() << "==========================";
     testSleep();
-*/
 
     qDebug();
     qDebug() << "Simple Lambda Test";
     qDebug() << "==========================";
     testLambda();
+*/
+
+    testNestedFibers();
 
     qDebug() << "Hello World!";
     return app.exec();
