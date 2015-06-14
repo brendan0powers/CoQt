@@ -39,13 +39,14 @@ void FiberPrivate::cleanup()
 //Actually yeild the fiber
 void FiberPrivate::pauseFiber()
 {
-    if(context()->curFiber())
-         (*context()->curFiber()->qxt_d().platform->yield)();
+    //yield control back to the context that woke us
+    (*context()->curFiber()->qxt_d().platform->yield)();
 }
 
 
 void FiberPrivate::wake()
 {
+    //switch to the fiber
     platform->coroutine();
 }
 

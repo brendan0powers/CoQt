@@ -59,8 +59,7 @@ void FiberPrivate::cleanup()
 void FiberPrivate::pauseFiber()
 {
     //Return execution to whatever fiber woke this one
-    if(context()->curFiber())
-         SwitchToFiber(context()->curFiber()->qxt_d().platform->stkWakers.pop());
+    SwitchToFiber(context()->curFiber()->qxt_d().platform->stkWakers.pop());
 }
 
 

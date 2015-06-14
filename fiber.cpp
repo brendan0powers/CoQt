@@ -43,21 +43,33 @@ bool Fiber::isFinished()
 
 void Fiber::yield()
 {
+   if(!context()->curFiber())
+       return;
+
    yield(new ImmediateWakeConiditon(context()->curFiber()));
 }
 
 void Fiber::yield(int iMs)
 {
+   if(!context()->curFiber())
+      return;
+
    yield(new SleepWakeConiditon(iMs, context()->curFiber()));
 }
 
 void Fiber::yield(std::function<bool()> func, int iPollInterval)
 {
+    if(!context()->curFiber())
+       return;
+
     yield(new LambdaWakeConiditon(func, context()->curFiber(), iPollInterval));
 }
 
 void Fiber::yield(WakeCondition *pCondition)
 {
+    if(!context()->curFiber())
+       return;
+
     context()->scheduler()->scheculeFiber(pCondition);
     context()->curFiber()->qxt_d().pCurWaitCondition = pCondition;
     FiberPrivate::pauseFiber();
@@ -65,6 +77,9 @@ void Fiber::yield(WakeCondition *pCondition)
 
 void Fiber::yieldForever()
 {
+    if(!context()->curFiber())
+       return;
+
     FiberPrivate::pauseFiber();
 }
 
