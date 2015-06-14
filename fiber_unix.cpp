@@ -1,5 +1,6 @@
 #include "fiber_p.h"
 #include "context.h"
+#include "sys/resource.h"
 
 //Functions in ucontext a depricated on OSX
 //enable them by defining _XOPEN_SOURCE
@@ -10,8 +11,6 @@
 #include "ucontext.h"
 #include <QDebug>
 #include <QThread>
-
-#define STACK_SIZE 1024*1024 * 8
 
 namespace CoQt {
 
@@ -43,11 +42,21 @@ void FiberPrivate::init()
 {
     platform = new FiberPrivatePlatform();
 
+    //Get the current stack size
+    quint32 uiStackSize = uiDefaultStackSize;
+    if(uiStackSize == 0) //Stack size is default, look up the platform default
+    {
+        struct rlimit result;
+        getrlimit(RLIMIT_STACK, &result);
+
+        uiStackSize = result.rlim_cur;
+    }
+
     //Get a context structure and allocate a new stack
     getcontext(&platform->child);
     platform->child.uc_link = 0;
-    platform->child.uc_stack.ss_sp = malloc(STACK_SIZE);
-    platform->child.uc_stack.ss_size = STACK_SIZE;
+    platform->child.uc_stack.ss_sp = malloc(uiStackSize);
+    platform->child.uc_stack.ss_size = uiStackSize;
     platform->child.uc_stack.ss_flags = 0;
 
     //Create the new child context

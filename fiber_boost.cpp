@@ -16,6 +16,11 @@ using namespace CoQt;
 void FiberPrivate::init()
 {
     platform = new FiberPrivatePlatform();
+
+    quint32 uiStackSize = uiDefaultStackSize;
+    if(uiDefaultStackSize == 0)
+        uiStackSize = boost::coroutines::stack_traits::default_size();
+
     platform->yield = NULL;
     platform->coroutine = boost::coroutines::asymmetric_coroutine<void>::pull_type(
                 [&](boost::coroutines::asymmetric_coroutine<void>::push_type& sink)
@@ -27,7 +32,7 @@ void FiberPrivate::init()
 
        //set the state to finished, and unregister fiber
        finishFiber();
-    });
+    }, boost::coroutines::attributes(uiStackSize));
 }
 
 void FiberPrivate::cleanup()

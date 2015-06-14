@@ -16,8 +16,8 @@ else:unix:!macx {
     SOURCES += fiber_unix.cpp
 }
 else {
-    INCLUDEPATH += "/usr/local/Cellar/boost/1.56.0/include/"
-    LIBS += "-L/usr/local/Cellar/boost/1.56.0/lib/"
+    INCLUDEPATH += "/usr/local/Cellar/boost/1.58.0/include/"
+    LIBS += "-L/usr/local/Cellar/boost/1.58.0/lib/"
     LIBS += -lboost_coroutine-mt -lboost_system-mt
 
     SOURCES += fiber_boost.cpp

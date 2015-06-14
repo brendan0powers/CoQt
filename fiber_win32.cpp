@@ -44,7 +44,7 @@ void FiberPrivate::init()
 
     //Create the fiber with the default stack size, pass in this
     //private object as the fiber data
-    platform->pFiber = CreateFiber(0, fiberInit, this);
+    platform->pFiber = CreateFiber(uiDefaultStackSize, fiberInit, this);
 }
 
 void FiberPrivate::cleanup()

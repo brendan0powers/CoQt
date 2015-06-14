@@ -34,6 +34,7 @@ public:
     QWeakPointer<Fiber> wpThis;
     WakeCondition *pCurWaitCondition;
 
+    static quint32 uiDefaultStackSize;
 };
 
 }

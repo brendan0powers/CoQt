@@ -7,6 +7,8 @@
 
 using namespace CoQt;
 
+quint32 FiberPrivate::uiDefaultStackSize = 0;
+
 Fiber::Fiber(std::function<void()> func, QObject *parent)
     : QObject(parent)
 {
@@ -115,6 +117,16 @@ void Fiber::wake()
 
     qxt_d().state = FiberWaiting;
     emit waiting();
+}
+
+quint32 Fiber::getDefaultStackSize()
+{
+    return FiberPrivate::uiDefaultStackSize;
+}
+
+void Fiber::setDefaultStackSize(quint32 uiStackSize)
+{
+    FiberPrivate::uiDefaultStackSize = uiStackSize;
 }
 
 //Register a fiber with this threads context object

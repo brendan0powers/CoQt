@@ -113,6 +113,10 @@ public:
     //wake for any other reason
     static void yieldForever();
 
+    //Get and set the stack size for new fibers. A value of 0 indicates that
+    //the default stack size for the process will be used.
+    static quint32 getDefaultStackSize();
+    static void setDefaultStackSize(quint32 uiStackSize);
 
 signals:
     //Fiber state signals
