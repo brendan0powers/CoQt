@@ -70,6 +70,10 @@ void Fiber::yieldForever()
 
 void Fiber::wake()
 {
+    //Do not wake a finished fiber
+    if(qxt_d().state == FiberFinished)
+        return;
+
     FiberTracker tracker(qxt_d().wpThis.toStrongRef());
 
     if(qxt_d().pCurWaitCondition)
