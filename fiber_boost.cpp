@@ -25,9 +25,8 @@ void FiberPrivate::init()
 
        function();
 
-       state = Fiber::FiberFinished;
-       emit qxt_p().finished();
-       context()->unregisterFiber(wpThis.toStrongRef());
+       //set the state to finished, and unregister fiber
+       finishFiber();
     });
 }
 

@@ -23,27 +23,26 @@ using namespace CoQt;
 static void fiberInit()
 {
     int pointerLow, pointerHigh;
-    FiberPrivate *fiber = NULL;
+    FiberPrivate *pFiber = NULL;
 
     qDebug() << "Got Here...";
 
     //re-assemble pointer from 2 32bit ints if necessary
     if(sizeof(void *) == 32)
     {
-        fiber = (FiberPrivate *) pointerLow;
+        pFiber = (FiberPrivate *) pointerLow;
     }
     else
     {
-        fiber = (FiberPrivate *) (((quint64) pointerHigh) << 32 || pointerLow);
+        pFiber = (FiberPrivate *) (((quint64) pointerHigh) << 32 || pointerLow);
     }
 
-    swapcontext(&fiber->platform->child, &fiber->platform->parent);
+    swapcontext(&pFiber->platform->child, &fiber->platform->parent);
 
-    fiber->function();
+    pFiber->function();
 
-    fiber->state = Fiber::FiberFinished;
-    //emit fiber->qxt_p().finished();
-    //context()->unregisterFiber(fiber->wpThis.toStrongRef());
+    //set the state to finished, and unregister fiber
+    pFiber->finishFiber();
 }
 
 void FiberPrivate::init()

@@ -97,6 +97,13 @@ void FiberPrivate::registerFiber()
     context()->registerFiber(wpThis.toStrongRef());
 }
 
+void FiberPrivate::finishFiber()
+{
+    state = Fiber::FiberFinished;
+    emit qxt_p().finished();
+    context()->unregisterFiber(wpThis.toStrongRef());
+}
+
 QSharedPointer<Fiber> CoQt::createFiber(const std::function<void()> &func)
 {
     QSharedPointer<Fiber> pFiber = QSharedPointer<Fiber>(new Fiber(func, NULL));

@@ -26,6 +26,8 @@ public:
     static void pauseFiber();
     void wake();
 
+    void finishFiber(); //Set fiber finished state
+
     FiberPrivatePlatform *platform;
     std::function<void()> function;
     Fiber::FiberState state;
