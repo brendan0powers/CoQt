@@ -1,5 +1,6 @@
 #include "wakecondition.h"
 #include "fiber.h"
+#include <QFuture>
 
 using namespace CoQt;
 
@@ -92,6 +93,26 @@ bool LambdaWakeConiditon::canWake()
         m_wakeTime = QDateTime::currentDateTime().addMSecs(m_iPollInterval);
 
     return bResult;
+}
+
+
+SignalWakeCondition::SignalWakeCondition(QSharedPointer<Fiber> parent)
+    : WakeCondition(parent)
+{
+}
+
+SignalWakeCondition::~SignalWakeCondition()
+{
+}
+
+QDateTime SignalWakeCondition::wakeTime()
+{
+    return QDateTime();
+}
+
+bool SignalWakeCondition::canWake()
+{
+    return false;
 }
 
 

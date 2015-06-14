@@ -65,6 +65,17 @@ void Fiber::yield(std::function<bool()> func, int iPollInterval)
     yield(new LambdaWakeConiditon(func, context()->curFiber(), iPollInterval));
 }
 
+void Fiber::yield(QObject *obj, const char *signal)
+{
+    if(!context()->curFiber())
+       return;
+
+    SignalWakeCondition condition(context()->curFiber());
+    connect(obj, signal, &condition, SLOT(wake()));
+
+    yieldForever();
+}
+
 void Fiber::yield(WakeCondition *pCondition)
 {
     if(!context()->curFiber())

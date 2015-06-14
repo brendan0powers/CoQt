@@ -5,6 +5,9 @@
 #include <QSharedPointer>
 #include <QDateTime>
 #include <functional>
+#include <QFuture>
+#include <QFutureWatcher>
+#include <QDebug>
 
 namespace CoQt
 {
@@ -41,6 +44,7 @@ public:
     //from the scheduler queue.
     virtual bool canWake() = 0;
 
+public slots:
     //The fiber is woken when this function is called. If the WakeCondition
     //has been registered with the scheduler, it will be removed from the
     //scheduler queue.
@@ -97,6 +101,49 @@ private:
     QDateTime m_wakeTime;
     std::function<bool()> m_func;
     int m_iPollInterval;
+};
+
+//Waits on the outcome of a QFuture the fiber is worken if the QFuture is
+//finished or canceled. This allows integration with any of the QtConcurrent
+//functions that return a QFuture
+template <class T>
+class QFutureWakeCondition : public WakeCondition
+{
+public:
+    explicit QFutureWakeCondition(QFuture<T> *pFuture, QSharedPointer<Fiber> parent)
+      : WakeCondition(parent)
+      , m_pFuture(pFuture)
+      , m_pWatcher(new QFutureWatcher<T>())
+    {
+        m_pWatcher->setFuture(*m_pFuture);
+
+        QObject::connect(m_pWatcher, &QFutureWatcher<T>::finished, this, &QFutureWakeCondition<T>::wake);
+        QObject::connect(m_pWatcher, &QFutureWatcher<T>::canceled, this, &QFutureWakeCondition<T>::wake);
+    }
+
+    ~QFutureWakeCondition()
+    {
+        delete m_pWatcher;
+    }
+
+    virtual QDateTime wakeTime() { return QDateTime(); }
+    virtual bool canWake() { return false; }
+
+private:
+    QFuture<T> *m_pFuture;
+    QFutureWatcher<T> *m_pWatcher;
+};
+
+//A helper class that does nothing on it's own
+//connect to it's wake() slot to wake the fiber
+class SignalWakeCondition : public WakeCondition
+{
+public:
+    explicit SignalWakeCondition(QSharedPointer<Fiber> parent);
+    ~SignalWakeCondition();
+
+    virtual QDateTime wakeTime();
+    virtual bool canWake();
 };
 
 }

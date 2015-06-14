@@ -7,6 +7,8 @@
 #include <QWeakPointer>
 #include "functional"
 #include "qxtpimpl.h"
+#include "wakecondition.h"
+#include "context.h"
 
 namespace CoQt
 {
@@ -80,6 +82,28 @@ public:
     {
         yeild(std::bind(pFunc, object), iPollInterval);
     }
+
+    //Yield the fiber untill the specified QFuture is finished or canceled
+    //one the fiber is woken, the QFuture is returned so results can be
+    //retrieved. This allows a fiber to yield and wait for the outcome of
+    //any function in QtConcurrent that returns a QFuture.
+    //QtConcurrent::run() for example would allow a synchronous task to be
+    //run on another thread, and its' results to be retrieved when the task
+    //completes
+    template <class T>
+    static QFuture<T> yield(QFuture<T> future)
+    {
+        if(!context()->curFiber())
+           return future;
+
+        QFutureWakeCondition<T> waker(&future, context()->curFiber());
+        yieldForever();
+
+        return future;
+    }
+
+    //Yield the fiber, and wake when the specified signal is emitted
+    static void yield(QObject *obj, const char *signal);
 
     //Yeild the fiber and use the specified WakeCondition object to determine
     //when the fiber should be woken
