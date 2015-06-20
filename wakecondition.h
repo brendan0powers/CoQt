@@ -55,12 +55,12 @@ protected:
 };
 
 //Wakes the fiber on the next scheduler tick
-class ImmediateWakeConiditon : public WakeCondition
+class ImmediateWakeCondition : public WakeCondition
 {
     Q_OBJECT
 public:
-    explicit ImmediateWakeConiditon(QSharedPointer<Fiber> parent);
-    ~ImmediateWakeConiditon();
+    explicit ImmediateWakeCondition(QSharedPointer<Fiber> parent);
+    ~ImmediateWakeCondition();
 
     virtual QDateTime wakeTime();
     virtual bool canWake();
@@ -71,12 +71,12 @@ private:
 
 //Wakes the fiber no sooner than the next scheduler tick, or when iSleepMs
 //has elapsed.
-class SleepWakeConiditon : public WakeCondition
+class SleepWakeCondition : public WakeCondition
 {
     Q_OBJECT
 public:
-    explicit SleepWakeConiditon(int iSleepMs, QSharedPointer<Fiber> parent);
-    ~SleepWakeConiditon();
+    explicit SleepWakeCondition(int iSleepMs, QSharedPointer<Fiber> parent);
+    ~SleepWakeCondition();
 
     virtual QDateTime wakeTime();
     virtual bool canWake();
@@ -87,12 +87,12 @@ private:
 
 //Wakes the fiber when the function object returns true. The function is run
 //every iPollInterval MS with a minimum poll interval being one scheduler tick.
-class LambdaWakeConiditon : public WakeCondition
+class LambdaWakeCondition : public WakeCondition
 {
     Q_OBJECT
 public:
-    explicit LambdaWakeConiditon(std::function<bool()> func, QSharedPointer<Fiber> parent, int iPollInterval = 0);
-    ~LambdaWakeConiditon();
+    explicit LambdaWakeCondition(std::function<bool()> func, QSharedPointer<Fiber> parent, int iPollInterval = 0);
+    ~LambdaWakeCondition();
 
     virtual QDateTime wakeTime();
     virtual bool canWake();

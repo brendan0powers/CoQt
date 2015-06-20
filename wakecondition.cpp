@@ -21,45 +21,45 @@ void WakeCondition::wake()
     m_pFiber->wake();
 }
 
-ImmediateWakeConiditon::ImmediateWakeConiditon(QSharedPointer<Fiber> parent)
+ImmediateWakeCondition::ImmediateWakeCondition(QSharedPointer<Fiber> parent)
     : WakeCondition(parent)
     , m_wakeTime(QDateTime::currentDateTime())
 {
 
 }
 
-ImmediateWakeConiditon::~ImmediateWakeConiditon()
+ImmediateWakeCondition::~ImmediateWakeCondition()
 {
 }
 
-QDateTime ImmediateWakeConiditon::wakeTime()
+QDateTime ImmediateWakeCondition::wakeTime()
 {
     return m_wakeTime;
 }
 
-bool ImmediateWakeConiditon::canWake()
+bool ImmediateWakeCondition::canWake()
 {
     return true;
 }
 
 
-SleepWakeConiditon::SleepWakeConiditon(int iSleepMs, QSharedPointer<Fiber> parent)
+SleepWakeCondition::SleepWakeCondition(int iSleepMs, QSharedPointer<Fiber> parent)
     : WakeCondition(parent)
     , m_wakeTime(QDateTime::currentDateTime())
 {
     m_wakeTime = m_wakeTime.addMSecs(iSleepMs);
 }
 
-SleepWakeConiditon::~SleepWakeConiditon()
+SleepWakeCondition::~SleepWakeCondition()
 {
 }
 
-QDateTime SleepWakeConiditon::wakeTime()
+QDateTime SleepWakeCondition::wakeTime()
 {
     return m_wakeTime;
 }
 
-bool SleepWakeConiditon::canWake()
+bool SleepWakeCondition::canWake()
 {
     return (m_wakeTime <= QDateTime::currentDateTime());
 }
@@ -67,7 +67,7 @@ bool SleepWakeConiditon::canWake()
 
 
 
-LambdaWakeConiditon::LambdaWakeConiditon(std::function<bool()> func, QSharedPointer<Fiber> parent, int iPollInterval)
+LambdaWakeCondition::LambdaWakeCondition(std::function<bool()> func, QSharedPointer<Fiber> parent, int iPollInterval)
     : WakeCondition(parent)
     , m_wakeTime(QDateTime::currentDateTime())
     , m_func(func)
@@ -76,16 +76,16 @@ LambdaWakeConiditon::LambdaWakeConiditon(std::function<bool()> func, QSharedPoin
     m_wakeTime = m_wakeTime.addMSecs(iPollInterval);
 }
 
-LambdaWakeConiditon::~LambdaWakeConiditon()
+LambdaWakeCondition::~LambdaWakeCondition()
 {
 }
 
-QDateTime LambdaWakeConiditon::wakeTime()
+QDateTime LambdaWakeCondition::wakeTime()
 {
     return m_wakeTime;
 }
 
-bool LambdaWakeConiditon::canWake()
+bool LambdaWakeCondition::canWake()
 {
     bool bResult = m_func();
 

@@ -48,7 +48,7 @@ void Fiber::yield()
    if(!context()->curFiber())
        return;
 
-   yield(new ImmediateWakeConiditon(context()->curFiber()));
+   yield(new ImmediateWakeCondition(context()->curFiber()));
 }
 
 void Fiber::yield(int iMs)
@@ -56,7 +56,7 @@ void Fiber::yield(int iMs)
    if(!context()->curFiber())
       return;
 
-   yield(new SleepWakeConiditon(iMs, context()->curFiber()));
+   yield(new SleepWakeCondition(iMs, context()->curFiber()));
 }
 
 void Fiber::yield(std::function<bool()> func, int iPollInterval)
@@ -64,7 +64,7 @@ void Fiber::yield(std::function<bool()> func, int iPollInterval)
     if(!context()->curFiber())
        return;
 
-    yield(new LambdaWakeConiditon(func, context()->curFiber(), iPollInterval));
+    yield(new LambdaWakeCondition(func, context()->curFiber(), iPollInterval));
 }
 
 void Fiber::yield(QObject *obj, const char *signal)
