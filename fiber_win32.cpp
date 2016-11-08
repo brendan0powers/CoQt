@@ -20,9 +20,16 @@ using namespace CoQt;
 //to run fibers on
 static QThreadStorage<void *> gMainFibers;
 
+//_stdcall only for 32bit CPUs
+#ifdef Q_PROCESSOR_X86_32
+#define STDCALL __stdcall
+#else
+#define STDCALL
+#endif
+
 //Fiber main function, get's the pointer to the FiberPrivate
 //object, and calls the fibers actual fiber function
-__stdcall void fiberInit(void *pData)
+STDCALL void fiberInit(void *pData)
 {
    FiberPrivate *pFiber = (FiberPrivate *)pData;
 
