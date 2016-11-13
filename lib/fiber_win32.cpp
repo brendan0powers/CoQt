@@ -38,6 +38,10 @@ STDCALL void fiberInit(void *pData)
 
    //set the state to finished, and unregister fiber
    pFiber->finishFiber();
+
+   //Win32 fibers shouldn't ever exit, so ensure we return
+   //to the previous fiber
+   pFiber->pauseFiber();
 }
 
 void FiberPrivate::init()

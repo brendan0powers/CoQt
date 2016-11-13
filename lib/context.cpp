@@ -1,10 +1,9 @@
 #include "context.h"
 #include <QThreadStorage>
 #include "scheduler.h"
+#include <QDebug>
 
 using namespace CoQt;
-
-static QThreadStorage<Context *> g_strContexts;
 
 Context::Context(QObject *parent)
     : QObject(parent)
@@ -69,8 +68,9 @@ FiberTracker::~FiberTracker()
 
 CoQt::Context *CoQt::context()
 {
-    if(!g_strContexts.hasLocalData())
-        g_strContexts.setLocalData(new Context(NULL));
+    static QThreadStorage<Context *> contexts;
+    if(!contexts.hasLocalData())
+        contexts.setLocalData(new Context(NULL));
 
-    return g_strContexts.localData();
+    return contexts.localData();
 }

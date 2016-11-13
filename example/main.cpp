@@ -211,7 +211,7 @@ int main(int argc, char * argv[])
     //to see what's happening
     CoQt::context()->scheduler()->setMinimumTickTime(250);
 
-    /*
+
     qDebug();
     qDebug() << "Simple Fiber Test";
     qDebug() << "==========================";
@@ -231,9 +231,6 @@ int main(int argc, char * argv[])
     qDebug() << "Simple Lambda Test";
     qDebug() << "==========================";
     testLambda();
-*/
-
-    testSignalWakeStyle2();
 
     qDebug() << "Running the event loop";
     app.exec();
